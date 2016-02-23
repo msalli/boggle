@@ -1,0 +1,53 @@
+.boggle-main {
+  color: #A3A3A3;
+}
+
+.boggle-title {
+  margin-bottom: 40px;
+}
+
+.timer-text {
+  text-align: center;
+  padding: 20px;
+  margin-left: 10px;
+  border: 2px solid #CCCCCC;
+  border-radius: 8px;
+  background-color: #FDFAFA;
+}
+
+.boggle-board,
+.boggle-word-bank,
+.boggle-form {
+  max-width: 350px;
+  margin: auto;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.boggle-square {
+  padding-bottom: 10px;
+}
+
+.boggle-letter {
+  width: 75px;
+  height: 70px;
+  margin: auto;
+  border: 2px solid #CCCCCC;
+  border-radius: 8px;
+  box-shadow: 1px 1px 3px #CCCCCC;
+  padding: 20px;
+  background-color: #FDFAFA;
+}
+
+.highlight {
+  background-color: #FA45D7;
+  color: white;
+}
+
+.boggle-letter:hover {
+  border: 1px solid #CCCCCC;
+}
+
+.boggle-word-bank {
+  margin-top: 40px;
+}

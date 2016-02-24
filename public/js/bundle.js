@@ -8,19 +8,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
   UserActions.handleSubmit();
   Timer.initializeClock(new Date());
 
-  // letters must be next to each other
-  function checkValue(value, letters) {
-
-  }
-
-
 })
 
-
-//things i want to happen
-// on entering a letter - highlight the correct box
-// don't let them enter a letter that is not next to that letter
-// so need a smaller version of the full word script
 },{"./timer":2,"./user-actions":3}],2:[function(require,module,exports){
 var Timer = {
 
@@ -73,6 +62,9 @@ var Settings = require('../../settings');
 
 var UserActions = {
 
+   trackHistory: [],
+   validPotentialMoves: [],
+
    handleSubmit: function() {
     $('form').submit(function(event) {
       event.preventDefault();
@@ -93,59 +85,93 @@ var UserActions = {
     });
   },
 
+  checkPositionExists: function(array, value, getIndex) {
+    var outcome = false;
+    array.forEach(function(entry, index) {
+      if (entry[0] === value[0] && entry[1] === value[1]) {
+        outcome = getIndex ? index : true
+      }
+    });
+    return outcome;
+  },
+
+  getValidMoves: function(boardPosition) {
+    var potentialMoves = Settings.traverseBoard;
+
+    // clear moves from last entry
+    if (UserActions.validPotentialMoves.length !== 0) {
+      UserActions.validPotentialMoves = [];
+    }
+
+    for (var i = 0; i < potentialMoves.length; i++) {
+      var positionToCheck = [boardPosition[0] + potentialMoves[i][0], boardPosition[1] + potentialMoves[i][1]];
+      var isValidMove = UserActions.checkPositionExists(Settings.board, positionToCheck, true);
+
+      if (isValidMove) {
+        UserActions.validPotentialMoves.push(isValidMove);
+        console.log("moves? " + UserActions.validPotentialMoves)
+      }
+    }
+  },
+
+  createHistory: function(boardIndex) {
+    var boardPosition = Settings.board[boardIndex];
+    UserActions.trackHistory.push(boardIndex);
+    UserActions.getValidMoves(boardPosition);
+    console.log("here? " + UserActions.trackHistory);
+  },
+
+  handleInvalidEntry: function(formElement) {
+    formElement.parentNode.classList.add("has-error");
+    document.getElementById('invalidEntry').classList.remove('hidden');
+    document.querySelector('input[type="submit"]').setAttribute('disabled', 'disabled');
+    return
+  },
+
   handleUserEntry: function () {
     var formInput = document.getElementById('word');
     var boggleBoard = document.querySelector('.boggle-board');
     var letters = Settings.letters;
-
-    // match current letters with position on board
-    // var currentEntry = formInput.value.split('');
 
     // handle keyboard entry
     formInput.onkeydown = function(event) {
       var value = String.fromCharCode(event.keyCode);
       if (letters.indexOf(value) !== -1) {
         var index = letters.indexOf(value);
-        var boggleSquare = document.querySelectorAll('.boggle-letter')[index];
-        boggleSquare.classList.add('highlight');
+
+          if (UserActions.validPotentialMoves.length === 0 || UserActions.validPotentialMoves.indexOf(index) !== -1) {
+            UserActions.createHistory(index);
+          } else {
+            UserActions.handleInvalidEntry(formInput);
+          }
+
+        // UI STUFF
+        var boggleLetter = document.querySelectorAll('.boggle-letter')[index];
+        boggleLetter.classList.add('highlight');
+      } else {
+        UserActions.handleInvalidEntry(formInput);
       }
+
     }
 
     // handle click on square
     boggleBoard.onclick = function(event) {
       if (event.target.classList.contains('boggle-letter')) {
+        var index = parseInt(event.target.dataset.boardIndex);
+
+          if (UserActions.validPotentialMoves.length === 0 || UserActions.validPotentialMoves.indexOf(index) !== -1) {
+            UserActions.createHistory(index);
+          } else {
+            UserActions.handleInvalidEntry(formInput);
+          }
+
+        //UI STUFF
         var boggleLetter = event.target;
         boggleLetter.classList.add('highlight');
         formInput.value += boggleLetter.textContent;
       }
     }
-  },
-
-  // full string entered in form field
-  // values entered cannot have the same value for data-board-index
-  // values must be next to each other
-
-//   checkNeighborValues: function(element) {
-//     var potentialMoves = Settings.potentialMoves;
-//     var currentSquare = Settings.board[element.data('board-index')];
-//     var currentValue = element.text();
-
-//     for (var i = 0; i < potentialMoves.length; i++) {
-//       var positionToCheck = [currentSquare[0] + potentialMoves[i][0], currentSquare[1] + potentialMoves[i][1]];
-//       var nextIndex = UserActions.checkForSquare(Settings.board, positionToCheck, true);
-//     }
-
-//   },
-
-//   checkForSquare: function(array, value, getIndex) {
-//   var outcome = false;
-//   array.forEach(function(entry, index) {
-//     if (entry[0] === value[0] && entry[1] === value[1]) {
-//       outcome = getIndex ? index : true
-//     }
-//   });
-//   return outcome;
-// }
+  }
 
 
 }

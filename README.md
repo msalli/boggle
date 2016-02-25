@@ -1,5 +1,5 @@
 # boggle
-Node app for a Boggle solver
+Node app for a boggle game & solver
 
 Start a game of boggle and enter words by connecting letters on the board. 
 

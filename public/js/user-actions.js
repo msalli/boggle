@@ -1,4 +1,4 @@
-var Settings = require('../../settings');
+var Settings = require('./settings');
 
 var UserActions = {
 
@@ -19,6 +19,9 @@ var UserActions = {
         formInput.val('');
         $('.submitted-words').append("<h5>" + data['displayWords'] + "</h5>");
         $('.boggle-letter').removeClass('highlight');
+        $('#invalidEntry').addClass('hidden');
+        UserActions.trackHistory = [];
+        UserActions.validPotentialMoves = [];
       }).fail(function() {
         console.log("that figures");
       })
@@ -49,7 +52,6 @@ var UserActions = {
 
       if (isValidMove) {
         UserActions.validPotentialMoves.push(isValidMove);
-        console.log("moves? " + UserActions.validPotentialMoves)
       }
     }
   },
@@ -58,13 +60,12 @@ var UserActions = {
     var boardPosition = Settings.board[boardIndex];
     UserActions.trackHistory.push(boardIndex);
     UserActions.getValidMoves(boardPosition);
-    console.log("here? " + UserActions.trackHistory);
   },
 
   handleInvalidEntry: function(formElement) {
-    formElement.parentNode.classList.add("has-error");
+    // formElement.parentNode.classList.add("has-error");
     document.getElementById('invalidEntry').classList.remove('hidden');
-    document.querySelector('input[type="submit"]').setAttribute('disabled', 'disabled');
+    // document.querySelector('input[type="submit"]').setAttribute('disabled', 'disabled');
     return
   },
 
@@ -82,6 +83,9 @@ var UserActions = {
           if (UserActions.validPotentialMoves.length === 0 || UserActions.validPotentialMoves.indexOf(index) !== -1) {
             UserActions.createHistory(index);
           } else {
+            console.log("catch 1")
+            console.log(index)
+            console.log(UserActions.validPotentialMoves)
             UserActions.handleInvalidEntry(formInput);
           }
 
@@ -89,7 +93,9 @@ var UserActions = {
         var boggleLetter = document.querySelectorAll('.boggle-letter')[index];
         boggleLetter.classList.add('highlight');
       } else {
-        UserActions.handleInvalidEntry(formInput);
+        if (index !== undefined) {
+          UserActions.handleInvalidEntry(formInput);
+        }
       }
 
     }
@@ -102,6 +108,7 @@ var UserActions = {
           if (UserActions.validPotentialMoves.length === 0 || UserActions.validPotentialMoves.indexOf(index) !== -1) {
             UserActions.createHistory(index);
           } else {
+            console.log("catch 3")
             UserActions.handleInvalidEntry(formInput);
           }
 

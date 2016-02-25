@@ -15,15 +15,14 @@ var Timer = {
         window.clearInterval(timeInterval);
         timerEl.textContent = "Time's up!"
         var formInput = document.getElementById('word');
-        // form.setAttribute('disabled', 'disabled');
+        form.setAttribute('disabled', 'disabled');
       }
 
     }, 1000)
   },
 
   countdown: function(startTime) {
-    // 180000
-    var time = (Date.parse(startTime) + 8000) - Date.parse(new Date());
+    var time = (Date.parse(startTime) + 180000) - Date.parse(new Date());
     var seconds = Math.floor( (time/1000) % 60 );
     var minutes = Math.floor( (time/1000/60) % 60 );
 

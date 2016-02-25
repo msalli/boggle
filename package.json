@@ -2,8 +2,12 @@
   "name": "boggle",
   "version": "1.0.0",
   "description": "",
+  "engines": {
+    "node": "v0.10.35"
+    },
   "main": "app.js",
   "scripts": {
+    "preinstall": "browserify ./public/js/main.js > ./public/js/bundle.js",
     "start": "node app.js"
   },
   "repository": {

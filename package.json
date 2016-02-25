@@ -4,7 +4,7 @@
   "description": "",
   "engines": {
     "node": "v0.10.35"
-    },
+  },
   "main": "app.js",
   "scripts": {
     "preinstall": "browserify ./public/js/main.js > ./public/js/bundle.js",
@@ -21,6 +21,8 @@
   },
   "homepage": "https://github.com/msalli/boggle",
   "dependencies": {
+    "body-parser": "^1.15.0",
+    "browserify": "^13.0.0",
     "ejs": "^2.4.1",
     "express": "^4.13.4",
     "nodemon": "^1.8.1"

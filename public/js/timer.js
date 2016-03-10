@@ -1,3 +1,6 @@
+var Boggle = require('./boggle').getBoggle();
+var UserActions = require('./user-actions')
+
 var Timer = {
 
   initializeClock: function(startTime) {
@@ -15,7 +18,10 @@ var Timer = {
         window.clearInterval(timeInterval);
         timerEl.textContent = "Time's up!"
         var formInput = document.getElementById('word');
-        form.setAttribute('disabled', 'disabled');
+        var submitButton = document.querySelector('.submit-btn');
+        formInput.setAttribute('disabled', 'disabled');
+        submitButton.setAttribute('disabled', 'disabled');
+        Timer.gameOver(Boggle.answers, UserActions.submittedWords, UserActions.points);
       }
 
     }, 1000)
@@ -31,6 +37,30 @@ var Timer = {
       'minutes': minutes,
       'seconds': seconds
     }
+  },
+
+  gameOver: function(answers, userAnswers, points) {
+    var parentDiv = document.querySelector('.game-over');
+    var allWordsDiv = document.querySelector('.all-words');
+    var totalPoints = answers.length * 4;
+    var userPoints;
+
+    for (var i = 0; i < answers.length; i++) {
+      var newEl = document.createElement('h5');
+      var textNode = document.createTextNode(answers[i]);
+      newEl.appendChild(textNode);
+      newEl.classList.add('boggle-answer');
+
+      if (userAnswers.indexOf(answers[i]) !== -1) {
+        newEl.classList.add('winner');
+        userPoints += answers[i].length;
+      }
+
+      allWordsDiv.appendChild(newEl);
+    }
+
+    document.querySelector('.boggle-word-bank').removeChild(document.querySelector('.submitted-words'))
+    parentDiv.classList.remove('hidden');
   }
 
 }

@@ -1,11 +1,18 @@
-var Settings = require('./settings');
+var Boggle = require('./boggle').getBoggle();
 
 var UserActions = {
 
-   trackHistory: [],
-   validPotentialMoves: [],
+  trackHistory: [],
+  validPotentialMoves: [],
+  letters: Boggle.letters,
+  dictionary: Boggle.dictionary,
+  board: Boggle.board,
+  potentialMoves: Boggle.potentialMoves,
+  submittedWords: [],
+  points: 0,
 
-   handleSubmit: function() {
+  // submitting a word
+  handleSubmit: function() {
     $('form').submit(function(event) {
       event.preventDefault();
       var formInput = $(this).find('#word')
@@ -15,77 +22,88 @@ var UserActions = {
         url: "/add-word",
         method: "POST",
         data: { word: value }
-      }).success(function(data) {
+      }).done(function(data) {
+        var word = data['displayWords']
+        // reset
         formInput.val('');
-        $('.submitted-words').append("<h5>" + data['displayWords'] + "</h5>");
-        $('.boggle-letter').removeClass('highlight');
-        $('#invalidEntry').addClass('hidden');
         UserActions.trackHistory = [];
         UserActions.validPotentialMoves = [];
+
+        // save word and calculate points
+        UserActions.submittedWords.push(word);
+        if (UserActions.dictionary.hasOwnProperty(word)) {
+          UserActions.points = UserActions.points + word.length
+          $('.point-tracker').text(UserActions.points)
+        }
+
+        // UI STUFF
+        $('.submitted-words').append("<h5>" + word + "</h5>");
+        $('.boggle-letter').removeClass('highlight');
+        $('#invalidEntry').addClass('hidden');
       }).fail(function() {
-        console.log("that figures");
+        console.log("something done broke");
       })
     });
   },
 
-  checkPositionExists: function(array, value, getIndex) {
-    var outcome = false;
-    array.forEach(function(entry, index) {
-      if (entry[0] === value[0] && entry[1] === value[1]) {
-        outcome = getIndex ? index : true
+  getIndexForSquare: function(value) {
+    var board = UserActions.board;
+
+    for(var i = 0; i < board.length; i++) {
+      if (board[i][0] === value[0] && board[i][1] === value[1]) {
+        return i;
       }
-    });
-    return outcome;
+    }
+    return -1;
   },
 
-  getValidMoves: function(boardPosition) {
-    var potentialMoves = Settings.traverseBoard;
+  getValidMoves: function(currentSquare) {
+    var potentialMoves = UserActions.potentialMoves;
 
-    // clear moves from last entry
+    // clear potential moves from last entry
     if (UserActions.validPotentialMoves.length !== 0) {
       UserActions.validPotentialMoves = [];
     }
 
+    // find all adjacent squares
     for (var i = 0; i < potentialMoves.length; i++) {
-      var positionToCheck = [boardPosition[0] + potentialMoves[i][0], boardPosition[1] + potentialMoves[i][1]];
-      var isValidMove = UserActions.checkPositionExists(Settings.board, positionToCheck, true);
+      var adjacentSquare = [currentSquare[0] + potentialMoves[i][0], currentSquare[1] + potentialMoves[i][1]];
+      var adjacentSquareIndex = UserActions.getIndexForSquare(adjacentSquare);
 
-      if (isValidMove) {
-        UserActions.validPotentialMoves.push(isValidMove);
+      // if square is on the board and hasn't already been selected
+      if (adjacentSquareIndex !== -1 && UserActions.trackHistory.indexOf(adjacentSquareIndex) === -1) {
+        UserActions.validPotentialMoves.push(adjacentSquareIndex);
       }
     }
   },
 
   createHistory: function(boardIndex) {
-    var boardPosition = Settings.board[boardIndex];
+    var currentSquare = UserActions.board[boardIndex];
     UserActions.trackHistory.push(boardIndex);
-    UserActions.getValidMoves(boardPosition);
+    UserActions.getValidMoves(currentSquare);
   },
 
   handleInvalidEntry: function(formElement) {
-    // formElement.parentNode.classList.add("has-error");
     document.getElementById('invalidEntry').classList.remove('hidden');
-    // document.querySelector('input[type="submit"]').setAttribute('disabled', 'disabled');
     return
   },
 
   handleUserEntry: function () {
     var formInput = document.getElementById('word');
-    var boggleBoard = document.querySelector('.boggle-board');
-    var letters = Settings.letters;
+    var boggleBoardEl = document.querySelector('.boggle-board');
+    var letters = UserActions.letters;
 
     // handle keyboard entry
     formInput.onkeydown = function(event) {
       var value = String.fromCharCode(event.keyCode);
       if (letters.indexOf(value) !== -1) {
+        // use the entered value to figure out letter, instead of index...
         var index = letters.indexOf(value);
 
           if (UserActions.validPotentialMoves.length === 0 || UserActions.validPotentialMoves.indexOf(index) !== -1) {
             UserActions.createHistory(index);
           } else {
             console.log("catch 1")
-            console.log(index)
-            console.log(UserActions.validPotentialMoves)
             UserActions.handleInvalidEntry(formInput);
           }
 
@@ -101,7 +119,7 @@ var UserActions = {
     }
 
     // handle click on square
-    boggleBoard.onclick = function(event) {
+    boggleBoardEl.onclick = function(event) {
       if (event.target.classList.contains('boggle-letter')) {
         var index = parseInt(event.target.dataset.boardIndex);
 
